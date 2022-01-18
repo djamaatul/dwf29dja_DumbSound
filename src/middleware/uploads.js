@@ -6,11 +6,25 @@ exports.uploads = (fieldName, dir) => {
 			cb(null, `assets/${dir}`);
 		},
 		filename: function (req, file, cb) {
-			cb(null, Date.now() + '_' + file.originalname.replace(/\s/g, ''));
+			const extension = file.originalname.split('.');
+			cb(null, Date.now() + '_' + fieldName + '.' + extension[extension.length - 1]);
 		},
 	});
 	const fileFilter = (req, file, cb) => {
-		if (file.fieldname == fieldName) {
+		if (file.fieldname == 'attachment') {
+			if (dir == 'invoices') {
+				if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|svg|SVG)$/)) {
+					req.fileValidationError = { message: 'cant upload except image' };
+					return cb(null, false);
+				}
+			} else {
+				if (!file.originalname.match(/\.(mp3|MP3)$/)) {
+					req.fileValidationError = { message: 'cant upload except Music' };
+					return cb(null, false);
+				}
+			}
+			return cb(null, true);
+		} else if (file.fieldname == 'thumbnail') {
 			if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|svg|SVG)$/)) {
 				req.fileValidationError = { message: 'cant upload except image' };
 				return cb(null, false);
