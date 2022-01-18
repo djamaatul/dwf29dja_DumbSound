@@ -23,7 +23,7 @@ router.post('/login', login);
 router.get('/genders', getGenders);
 
 router.get('/musics', getMusics);
-router.post('/music', auth, uploads('attachment', 'musics'), uploads('thumbnail', 'thumbnails'), addMusic);
+router.post('/music', auth, uploads('attachment', 'musics'), addMusic);
 
 router.post('/transaction', auth, uploads('attachment', 'invoices'), addTransaction);
 router.get('/transaction', auth, getTransaction);

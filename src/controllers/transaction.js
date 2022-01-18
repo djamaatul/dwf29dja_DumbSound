@@ -4,12 +4,11 @@ exports.addTransaction = async (req, res) => {
 	const userid = req.user.id;
 	const { accountnumber } = req.body;
 	try {
-		console.log(req.file);
 		const data = await transactions.create({
 			userid,
 			accountnumber,
 			status: 'pending',
-			attachment: req.file.filename,
+			attachment: req.files.attachment[0].filename,
 		});
 		return res.status(200).send({
 			status: 'success',

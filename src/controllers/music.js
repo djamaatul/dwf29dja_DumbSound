@@ -1,4 +1,4 @@
-const { musics, artists } = require('../../models');
+const { musics, artists, users } = require('../../models');
 
 exports.getMusics = async (req, res) => {
 	try {
@@ -36,7 +36,11 @@ exports.addMusic = async (req, res) => {
 				message: 'Acces Denied',
 			});
 		}
-		const newdata = await musics.create(body);
+		const newdata = await musics.create({
+			...body,
+			attachment: req.files.attachment[0].filename,
+			thumbnail: req.files.thumbnail[0].filename,
+		});
 
 		const music = await musics.findOne({
 			where: {

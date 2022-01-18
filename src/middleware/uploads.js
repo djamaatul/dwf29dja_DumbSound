@@ -38,7 +38,16 @@ exports.uploads = (fieldName, dir) => {
 		limits: {
 			fileSize: 10000000, //10 mega by byte
 		},
-	}).single(fieldName);
+	}).fields([
+		{
+			name: 'attachment',
+			maxCount: 1,
+		},
+		{
+			name: 'thumbnail',
+			maxCount: 1,
+		},
+	]);
 
 	return (req, res, next) => {
 		upload(req, res, (error) => {
