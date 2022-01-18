@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
 			// define association here
 			genders.hasMany(models.users, {
 				as: 'gender',
-				foreignKey: 'gender',
+				foreignKey: 'genderid',
 			});
 		}
 	}

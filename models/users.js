@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
 			});
 			users.belongsTo(models.genders, {
 				as: 'gender',
-				foreignKey: 'gender',
+				foreignKey: 'genderid',
 			});
 		}
 	}
@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
 			password: DataTypes.STRING,
 			fullname: DataTypes.STRING,
 			roleid: DataTypes.INTEGER,
-			gender: DataTypes.INTEGER,
+			genderid: DataTypes.INTEGER,
 			phone: DataTypes.STRING,
 			address: DataTypes.TEXT,
 		},

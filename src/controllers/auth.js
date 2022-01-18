@@ -63,6 +63,7 @@ exports.register = async (req, res) => {
 		fullname: joi.string().min(3).required(),
 		email: joi.string().email().required(),
 		password: joi.string().min(4).required(),
+		gender: joi.number().required(),
 		phone: joi.string().min(11).required(),
 		address: joi.string().min(8).required(),
 	});
@@ -90,7 +91,7 @@ exports.register = async (req, res) => {
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(body.password, salt);
 
-		const registeredData = await users.create({ ...body, password: hashedPassword });
+		const registeredData = await users.create({ ...body, password: hashedPassword, roleid: 2 });
 
 		const token = jwt.sign({ id: registeredData.dataValues.id }, process.env.SECRET_KEY);
 		return res.status(200).send({
@@ -98,6 +99,7 @@ exports.register = async (req, res) => {
 			token,
 		});
 	} catch (error) {
+		console.log(error);
 		return res.status(500).send({
 			status: 'failed',
 			message: 'register server error',
