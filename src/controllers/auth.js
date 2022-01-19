@@ -59,11 +59,12 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
 	const body = req.body;
+	console.log(body);
 	const schema = joi.object({
 		fullname: joi.string().min(3).required(),
 		email: joi.string().email().required(),
 		password: joi.string().min(4).required(),
-		gender: joi.number().required(),
+		genderid: joi.number().required(),
 		phone: joi.string().min(11).required(),
 		address: joi.string().min(8).required(),
 	});
@@ -103,6 +104,43 @@ exports.register = async (req, res) => {
 		return res.status(500).send({
 			status: 'failed',
 			message: 'register server error',
+		});
+	}
+};
+exports.checkAuth = async (req, res) => {
+	const authHeader = req.header('Authorization');
+	if (!authHeader) {
+		return res.status(404).send({
+			status: 'failed',
+			message: 'token not found',
+		});
+	}
+	const token = authHeader.split(' ')[1];
+	try {
+		const isVerified = jwt.verify(token, process.env.SECRET_KEY);
+		const userExist = await users.findOne({
+			where: {
+				id: isVerified.id,
+			},
+			attributes: {
+				exclude: ['password', 'createdAt', 'updatedAt'],
+			},
+		});
+		if (!userExist) {
+			return res.status(401).send({
+				status: 'failed',
+				message: 'invalid token',
+			});
+		}
+		console.log(userExist);
+		res.status(200).send({
+			status: 'success',
+			data: { role: userExist.roleid, token },
+		});
+	} catch (error) {
+		return res.status(401).send({
+			status: 'failed',
+			message: 'invalid token',
 		});
 	}
 };

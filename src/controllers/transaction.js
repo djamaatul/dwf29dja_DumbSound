@@ -1,5 +1,5 @@
 const { transactions, users } = require('../../models');
-
+const attachment_dir = 'http://localhost:5000/assets/invoices/';
 exports.addTransaction = async (req, res) => {
 	const userid = req.user.id;
 	const { accountnumber } = req.body;
@@ -22,7 +22,7 @@ exports.addTransaction = async (req, res) => {
 		});
 	}
 };
-exports.getTransaction = async (req, res) => {
+exports.getTransactions = async (req, res) => {
 	const id = req.user.id;
 	try {
 		const isAdmin = await users.findOne({
@@ -36,10 +36,23 @@ exports.getTransaction = async (req, res) => {
 				message: 'Acces Denied',
 			});
 		}
-		const data = await transactions.findAll();
+		let data = await transactions.findAll({
+			include: {
+				model: users,
+				as: 'user',
+				attributes: {
+					exclude: ['password'],
+				},
+			},
+		});
+		const newdata = [];
+		data.map((e, i) => {
+			newdata.push({ ...e.dataValues, attachment_link: attachment_dir + e.attachment });
+		});
+		console.log(newdata);
 		return res.status(200).send({
 			status: 'success',
-			data,
+			data: newdata,
 		});
 	} catch (error) {
 		return res.status(500).send({

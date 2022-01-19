@@ -12,6 +12,7 @@ app.use('/api/v1/', router);
 
 app.use('/assets/', express.static('assets'));
 app.use('/assets/musics', express.static('assets'));
+app.use('/assets/invoices', express.static('assets'));
 
 app.use((req, res) => {
 	res.status(404).send({

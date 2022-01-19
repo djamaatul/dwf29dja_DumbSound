@@ -1,4 +1,5 @@
 const { musics, artists, users } = require('../../models');
+const musics_dir = 'http://localhost:5000/assets/musics/';
 
 exports.getMusics = async (req, res) => {
 	try {
@@ -7,6 +8,10 @@ exports.getMusics = async (req, res) => {
 				model: artists,
 				as: 'artist',
 			},
+		});
+		data.map((e) => {
+			e.thumbnail = musics_dir + e.thumbnail;
+			e.attachment = musics_dir + e.attachment;
 		});
 		return res.status(200).send({
 			status: 'success',
@@ -24,6 +29,13 @@ exports.getMusics = async (req, res) => {
 exports.addMusic = async (req, res) => {
 	const id = req.user.id;
 	const body = req.body;
+	console.log(req.body);
+	if (!req.files) {
+		return res.status(400).send({
+			status: 'failed',
+			message: 'please upload file!',
+		});
+	}
 	try {
 		const isAdmin = await users.findOne({
 			where: {
@@ -38,6 +50,7 @@ exports.addMusic = async (req, res) => {
 		}
 		const newdata = await musics.create({
 			...body,
+			artistid: parseInt(body.artistid),
 			attachment: req.files.attachment[0].filename,
 			thumbnail: req.files.thumbnail[0].filename,
 		});
@@ -54,13 +67,13 @@ exports.addMusic = async (req, res) => {
 
 		return res.status(200).send({
 			status: 'success',
-			data: music,
+			// data: music,
 		});
 	} catch (error) {
 		console.log(error);
 		return res.status(500).send({
 			status: 'failed',
-			message: 'addArtist server error',
+			message: 'add Music server error',
 		});
 	}
 };
