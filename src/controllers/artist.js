@@ -1,9 +1,24 @@
 const { artists, artist_types, users } = require('../../models');
+const joi = require('joi');
 
 exports.addArtist = async (req, res) => {
 	const id = req.user.id;
 	const body = req.body;
-	console.log(body);
+
+	const schema = joi.object({
+		name: joi.string().required(),
+		old: joi.number().required(),
+		startcarrer: joi.number().required(),
+		typeid: joi.number().required(),
+	});
+	const { error } = schema.validate(body);
+	if (error) {
+		return res.status(400).send({
+			status: 'failed',
+			message: error.details[0].message,
+		});
+	}
+
 	try {
 		const isAdmin = await users.findOne({
 			where: {

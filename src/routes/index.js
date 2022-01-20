@@ -29,7 +29,7 @@ router.post('/music', auth, uploads('attachment', 'musics'), addMusic);
 
 router.post('/transaction', auth, uploads('attachment', 'invoices'), addTransaction);
 router.get('/transactions', auth, getTransactions);
-router.patch('/transaction', auth, approveTransaction);
+router.patch('/transaction/:id', auth, approveTransaction);
 
 router.post('/artist', auth, addArtist);
 router.get('/artists', getArtists);

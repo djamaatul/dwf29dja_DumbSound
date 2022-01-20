@@ -1,6 +1,8 @@
 const { musics, artists, users } = require('../../models');
 const musics_dir = 'http://localhost:5000/assets/musics/';
 
+const joi = require('joi');
+
 exports.getMusics = async (req, res) => {
 	try {
 		const data = await musics.findAll({
@@ -29,13 +31,27 @@ exports.getMusics = async (req, res) => {
 exports.addMusic = async (req, res) => {
 	const id = req.user.id;
 	const body = req.body;
-	console.log(req.body);
 	if (!req.files) {
 		return res.status(400).send({
 			status: 'failed',
 			message: 'please upload file!',
 		});
 	}
+
+	const schema = joi.object({
+		title: joi.string().required(),
+		year: joi.number().required(),
+		artistid: joi.number().required(),
+	});
+	const { error } = schema.validate(body);
+
+	if (error) {
+		return res.status(400).send({
+			status: 'failed',
+			message: error.details[0].message,
+		});
+	}
+
 	try {
 		const isAdmin = await users.findOne({
 			where: {
@@ -67,7 +83,7 @@ exports.addMusic = async (req, res) => {
 
 		return res.status(200).send({
 			status: 'success',
-			// data: music,
+			data: music,
 		});
 	} catch (error) {
 		console.log(error);

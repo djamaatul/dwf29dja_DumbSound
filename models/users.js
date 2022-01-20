@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
 			genderid: DataTypes.INTEGER,
 			phone: DataTypes.STRING,
 			address: DataTypes.TEXT,
+			subscribe: DataTypes.BOOLEAN,
 		},
 		{
 			sequelize,

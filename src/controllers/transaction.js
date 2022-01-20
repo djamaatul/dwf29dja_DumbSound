@@ -1,8 +1,21 @@
 const { transactions, users } = require('../../models');
+const joi = require('joi');
 const attachment_dir = 'http://localhost:5000/assets/invoices/';
 exports.addTransaction = async (req, res) => {
 	const userid = req.user.id;
 	const { accountnumber } = req.body;
+
+	const schema = joi.object({
+		accountnumber: joi.number().required(),
+	});
+	const { error } = schema.validate(accountnumber);
+	if (error) {
+		return res.status(400).send({
+			status: 'failed',
+			message: error.details[0].message,
+		});
+	}
+
 	try {
 		const data = await transactions.create({
 			userid,
@@ -49,7 +62,6 @@ exports.getTransactions = async (req, res) => {
 		data.map((e, i) => {
 			newdata.push({ ...e.dataValues, attachment_link: attachment_dir + e.attachment });
 		});
-		console.log(newdata);
 		return res.status(200).send({
 			status: 'success',
 			data: newdata,
@@ -65,6 +77,8 @@ exports.getTransactions = async (req, res) => {
 exports.approveTransaction = async (req, res) => {
 	const idTransaction = req.params.id;
 	const id = req.user.id;
+	const body = req.body;
+
 	try {
 		const isAdmin = await users.findOne({
 			where: {
@@ -86,24 +100,39 @@ exports.approveTransaction = async (req, res) => {
 			return res.status(404).send(status_failed('data is not exist'));
 		}
 
-		const startDate = new Date();
-		const dueDate = new Date(new Date().setMonth(a.getMonth() + 1));
-
-		await transactions.update(
-			{
-				startDate,
-				dueDate,
-			},
-			{
+		if (body.status == 'success') {
+			const startdate = new Date();
+			const duedate = new Date(new Date().setMonth(startdate.getMonth() + 1));
+			const updatedata = {
+				startdate,
+				duedate,
+				status: 'success',
+			};
+			await transactions.update(updatedata, {
 				where: {
 					id: idTransaction,
 				},
-			}
-		);
-		return res.status(200).send({
-			status: 'success',
-			message: `transaction at id ${idTransaction} succesfully approved`,
-		});
+			});
+			return res.status(200).send({
+				status: 'success',
+				message: `transaction at id ${idTransaction} succesfully approved`,
+			});
+		} else {
+			const updatedata = {
+				startdate: null,
+				duedate: null,
+				status: 'cancel',
+			};
+			await transactions.update(updatedata, {
+				where: {
+					id: idTransaction,
+				},
+			});
+			return res.status(200).send({
+				status: 'success',
+				message: `transaction at id ${idTransaction} succesfully canceled`,
+			});
+		}
 	} catch (error) {
 		return res.status(500).send({
 			status: 'failed',

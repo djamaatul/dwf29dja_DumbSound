@@ -2,12 +2,12 @@ const joi = require('joi');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const { users } = require('../../models');
+const { users, transactions } = require('../../models');
 
 exports.login = async (req, res) => {
 	const body = req.body;
 	const schema = joi.object({
-		email: body.email ?? joi.string().email(),
+		email: joi.string().email().required(),
 		password: joi.string().min(4).required(),
 	});
 	const { error } = schema.validate(body);
@@ -21,7 +21,7 @@ exports.login = async (req, res) => {
 	try {
 		const userExist = await users.findOne({
 			where: {
-				email: body.email ? body.email : '',
+				email: body.email,
 			},
 		});
 		if (!userExist) {
@@ -30,6 +30,7 @@ exports.login = async (req, res) => {
 				message: 'email  user not exist',
 			});
 		}
+
 		const authenticate = await bcrypt.compare(body.password, userExist.password);
 
 		if (!authenticate) {
@@ -39,14 +40,68 @@ exports.login = async (req, res) => {
 			});
 		}
 
-		const token = jwt.sign({ id: userExist.id }, process.env.SECRET_KEY);
+		const checkSubscribe = await transactions.findAll({
+			where: {
+				userid: userExist.id,
+			},
+		});
+
+		let remaining = [];
+		const checkDate = checkSubscribe.map((e) => {
+			remaining.push(
+				Math.round(
+					(parseInt(new Date(e.duedate).getTime()) - parseInt(new Date().getTime())) / (1000 * 60 * 60 * 24)
+				)
+			);
+			if (remaining[remaining.length - 1] <= 0) {
+				const update = async () => {
+					await transactions.update(
+						{ duedate: null, startdate: null },
+						{
+							where: {
+								id: e.id,
+							},
+						}
+					);
+				};
+				update();
+			}
+		});
+		const remaining_filtered = remaining.filter((e) => e > 0);
+		if (remaining_filtered.length == 0) {
+			await users.update(
+				{ subscribe: false },
+				{
+					where: {
+						id: userExist.id,
+					},
+				}
+			);
+		} else {
+			await users.update(
+				{ subscribe: true },
+				{
+					where: {
+						id: userExist.id,
+					},
+				}
+			);
+		}
+		const NewDataUserExist = await users.findOne({
+			where: {
+				email: body.email,
+			},
+		});
+
+		const token = jwt.sign({ id: NewDataUserExist.id }, process.env.SECRET_KEY);
 
 		return res.status(200).send({
 			status: 'success',
 			data: {
-				email: userExist.email,
-				role: userExist.roleid,
+				email: NewDataUserExist.email,
+				role: NewDataUserExist.roleid,
 				token,
+				subscribe: NewDataUserExist.subscribe,
 			},
 		});
 	} catch (error) {
@@ -132,10 +187,9 @@ exports.checkAuth = async (req, res) => {
 				message: 'invalid token',
 			});
 		}
-		console.log(userExist);
 		res.status(200).send({
 			status: 'success',
-			data: { role: userExist.roleid, token },
+			data: { role: userExist.roleid, token, subscribe: userExist.subscribe },
 		});
 	} catch (error) {
 		return res.status(401).send({
