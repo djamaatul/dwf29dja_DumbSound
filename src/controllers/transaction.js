@@ -3,12 +3,12 @@ const joi = require('joi');
 const attachment_dir = 'http://localhost:5000/assets/invoices/';
 exports.addTransaction = async (req, res) => {
 	const userid = req.user.id;
-	const { accountnumber } = req.body;
+	const body = req.body;
 
 	const schema = joi.object({
 		accountnumber: joi.number().required(),
 	});
-	const { error } = schema.validate(accountnumber);
+	const { error } = schema.validate(body);
 	if (error) {
 		return res.status(400).send({
 			status: 'failed',
@@ -19,7 +19,7 @@ exports.addTransaction = async (req, res) => {
 	try {
 		const data = await transactions.create({
 			userid,
-			accountnumber,
+			accountnumber: body.accountnumber,
 			status: 'pending',
 			attachment: req.files.attachment[0].filename,
 		});
