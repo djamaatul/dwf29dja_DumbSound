@@ -10,7 +10,7 @@ exports.auth = async (req, res, next) => {
 	}
 	const token = authorization.split(' ')[1];
 	try {
-		const data = jwt.verify(token, '.5Ecr3tk3y!!');
+		const data = jwt.verify(token, process.env.SECRET_KEY);
 		req.user = data;
 	} catch (error) {
 		return res.status(400).send({

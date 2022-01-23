@@ -93,7 +93,7 @@ exports.login = async (req, res) => {
 			},
 		});
 
-		const token = jwt.sign({ id: NewDataUserExist.id }, '.5Ecr3tk3y!!');
+		const token = jwt.sign({ id: NewDataUserExist.id }, process.env.SECRET_KEY);
 
 		return res.status(200).send({
 			status: 'success',
@@ -149,7 +149,7 @@ exports.register = async (req, res) => {
 
 		const registeredData = await users.create({ ...body, password: hashedPassword, roleid: 2 });
 
-		const token = jwt.sign({ id: registeredData.dataValues.id }, '.5Ecr3tk3y!!');
+		const token = jwt.sign({ id: registeredData.dataValues.id }, process.env.SECRET_KEY);
 		return res.status(200).send({
 			status: 'success',
 			token,
@@ -172,7 +172,7 @@ exports.checkAuth = async (req, res) => {
 	}
 	const token = authHeader.split(' ')[1];
 	try {
-		const isVerified = jwt.verify(token, '.5Ecr3tk3y!!');
+		const isVerified = jwt.verify(token, process.env.SECRET_KEY);
 		const userExist = await users.findOne({
 			where: {
 				id: isVerified.id,
