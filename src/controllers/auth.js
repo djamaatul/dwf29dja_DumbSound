@@ -40,14 +40,14 @@ exports.login = async (req, res) => {
 			});
 		}
 
-		const checkSubscribe = await transactions.findAll({
+		const usertrx = await transactions.findAll({
 			where: {
 				userid: userExist.id,
 			},
 		});
 
 		let remaining = [];
-		const checkDate = checkSubscribe.map((e) => {
+		usertrx.map((e) => {
 			remaining.push(
 				Math.round(
 					(parseInt(new Date(e.duedate).getTime()) - parseInt(new Date().getTime())) / (1000 * 60 * 60 * 24)
@@ -102,6 +102,7 @@ exports.login = async (req, res) => {
 				role: NewDataUserExist.roleid,
 				token,
 				subscribe: NewDataUserExist.subscribe,
+				ispending: usertrx ? (usertrx.filter((e) => e.status == 'pending').length > 0 ? true : false) : false,
 			},
 		});
 	} catch (error) {
@@ -187,9 +188,20 @@ exports.checkAuth = async (req, res) => {
 				message: 'invalid token',
 			});
 		}
+		const usertrx = await transactions.findAll({
+			where: {
+				userid: userExist.id,
+			},
+		});
+
 		res.status(200).send({
 			status: 'success',
-			data: { role: userExist.roleid, token, subscribe: userExist.subscribe },
+			data: {
+				role: userExist.roleid,
+				token,
+				subscribe: userExist.subscribe,
+				ispending: usertrx.filter((e) => e.status == 'pending').length > 0 ? true : false,
+			},
 		});
 	} catch (error) {
 		return res.status(401).send({

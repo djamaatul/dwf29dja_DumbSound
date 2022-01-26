@@ -2,6 +2,7 @@ const { musics, artists, users } = require('../../models');
 const musics_dir = 'http://localhost:5000/assets/musics/';
 
 const joi = require('joi');
+const { response } = require('express');
 
 exports.getMusics = async (req, res) => {
 	try {
@@ -90,6 +91,39 @@ exports.addMusic = async (req, res) => {
 		return res.status(500).send({
 			status: 'failed',
 			message: 'add Music server error',
+		});
+	}
+};
+exports.deleteMusic = async (req, res) => {
+	try {
+		const userid = req.user.id;
+		const musicid = req.params.id;
+
+		const isAdmin = await users.findOne({
+			where: {
+				id: userid,
+			},
+		});
+		console.log(userid);
+		if (isAdmin.roleid !== 1) {
+			return res.status(401).send({
+				status: 'failed',
+				message: 'Acces Denied',
+			});
+		}
+
+		await musics.destroy({
+			where: { id: musicid },
+		});
+		res.status(200).send({
+			status: 'success',
+			message: 'success delete music at id ' + musicid,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).send({
+			status: 'failed',
+			message: 'delete music server error',
 		});
 	}
 };

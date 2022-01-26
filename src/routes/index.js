@@ -4,7 +4,7 @@ const router = express.Router();
 
 const { login, register, checkAuth } = require('../controllers/auth');
 const { getGenders } = require('../controllers/data');
-const { getMusics, addMusic } = require('../controllers/music');
+const { getMusics, addMusic, deleteMusic } = require('../controllers/music');
 const { addTransaction, getTransactions, approveTransaction } = require('../controllers/transaction');
 const { addArtist, getArtists, getTypeArtists } = require('../controllers/artist');
 
@@ -26,6 +26,7 @@ router.get('/genders', getGenders);
 
 router.get('/musics', getMusics);
 router.post('/music', auth, uploads('attachment', 'musics'), addMusic);
+router.delete('/music/:id', auth, deleteMusic);
 
 router.post('/transaction', auth, uploads('attachment', 'invoices'), addTransaction);
 router.get('/transactions', auth, getTransactions);
