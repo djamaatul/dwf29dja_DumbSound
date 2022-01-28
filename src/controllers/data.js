@@ -1,4 +1,4 @@
-const { genders } = require('../../models');
+const { genders, roles } = require('../../models');
 
 exports.getGenders = async (req, res) => {
 	try {
@@ -26,6 +26,22 @@ exports.createGender = async (req, res) => {
 		return res.status(500).send({
 			status: 'failed',
 			message: 'getgender server error',
+		});
+	}
+};
+
+exports.createRole = async (req, res) => {
+	try {
+		const body = req.body;
+		const data = await roles.create(body);
+		return res.status(200).send({
+			status: 'success',
+			data,
+		});
+	} catch (error) {
+		return res.status(500).send({
+			status: 'failed',
+			message: error.message,
 		});
 	}
 };
