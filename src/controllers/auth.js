@@ -156,10 +156,9 @@ exports.register = async (req, res) => {
 			token,
 		});
 	} catch (error) {
-		console.log(error);
 		return res.status(500).send({
 			status: 'failed',
-			message: 'register server error',
+			message: error.message,
 		});
 	}
 };

@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const { login, register, checkAuth } = require('../controllers/auth');
-const { getGenders } = require('../controllers/data');
+const { getGenders, createGender } = require('../controllers/data');
 const { getMusics, addMusic, deleteMusic } = require('../controllers/music');
 const { addTransaction, getTransactions, approveTransaction } = require('../controllers/transaction');
 const { addArtist, getArtists, getTypeArtists } = require('../controllers/artist');
@@ -23,6 +23,7 @@ router.post('/login', login);
 router.get('/check-auth', checkAuth);
 
 router.get('/genders', getGenders);
+router.post('/gender', createGender);
 
 router.get('/musics', getMusics);
 router.post('/music', auth, uploads('attachment', 'musics'), addMusic);

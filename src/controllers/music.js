@@ -13,7 +13,7 @@ exports.getMusics = async (req, res) => {
 				as: 'artist',
 			},
 		});
-		data.map((e) => {
+		data?.map((e) => {
 			e.thumbnail = musics_dir + e.thumbnail;
 			e.attachment = musics_dir + e.attachment;
 		});
