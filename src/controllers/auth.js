@@ -162,6 +162,63 @@ exports.register = async (req, res) => {
 		});
 	}
 };
+exports.registerAdmin = async (req, res) => {
+	const body = req.body;
+	const tokenAdmin = req.header('authorization');
+
+	const schema = joi.object({
+		fullname: joi.string().min(3).required(),
+		email: joi.string().email().required(),
+		password: joi.string().min(4).required(),
+		genderid: joi.number().required(),
+		phone: joi.string().min(11).required(),
+		address: joi.string().min(8).required(),
+	});
+	const { error } = schema.validate(body);
+
+	if (error) {
+		return res.status(400).send({
+			status: 'failed',
+			message: error.details[0].message,
+		});
+	}
+	try {
+		if (tokenAdmin == process.env.tokenAdmin) {
+			const userExist = await users.findAll({
+				where: {
+					email: body.email,
+				},
+			});
+			if (userExist.length > 0) {
+				return res.status(400).send({
+					status: 'failed',
+					message: 'user email already exist',
+				});
+			}
+
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(body.password, salt);
+
+			const registeredData = await users.create({ ...body, password: hashedPassword, roleid: 1 });
+
+			const token = jwt.sign({ id: registeredData.dataValues.id }, process.env.SECRET_KEY);
+			return res.status(200).send({
+				status: 'success',
+				token,
+			});
+		} else {
+			return res.status(401).send({
+				status: 'faiiled',
+				message: 'access_denied',
+			});
+		}
+	} catch (error) {
+		return res.status(500).send({
+			status: 'failed',
+			message: error.message,
+		});
+	}
+};
 exports.checkAuth = async (req, res) => {
 	const authHeader = req.header('Authorization');
 	if (!authHeader) {

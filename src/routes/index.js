@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 
-const { login, register, checkAuth } = require('../controllers/auth');
+const { login, register, checkAuth, registerAdmin } = require('../controllers/auth');
 const { getGenders, createGender, createRole } = require('../controllers/data');
 const { getMusics, addMusic, deleteMusic } = require('../controllers/music');
 const { addTransaction, getTransactions, approveTransaction } = require('../controllers/transaction');
@@ -19,6 +19,7 @@ router.get('/', (req, res) => {
 });
 
 router.post('/register', register);
+router.post('/admin_register', registerAdmin);
 router.post('/login', login);
 router.get('/check-auth', checkAuth);
 
