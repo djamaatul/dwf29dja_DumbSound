@@ -1,5 +1,6 @@
 const { musics, artists, users } = require('../../models');
-const musics_dir = 'http://localhost:5000/assets/musics/';
+const musics_dir = process.env.BASE_URL + process.env.MUSIC_DIR;
+console.log(musics_dir);
 
 const joi = require('joi');
 const { response } = require('express');
